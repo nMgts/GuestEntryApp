@@ -1,5 +1,6 @@
 package com.example.guestentryapp;
 
+import com.example.guestentryapp.controllers.FormController;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -8,7 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -21,7 +21,6 @@ import javafx.scene.canvas.Canvas;
 import java.time.LocalDate;
 
 public class GuestEntryApp extends Application {
-
     private double lastX, lastY;
 
     public static void main(String[] args) {
@@ -141,6 +140,7 @@ public class GuestEntryApp extends Application {
         CheckBox chkMedical = new CheckBox("Posiadam badania lekarskie");
         CheckBox chkInstruction = new CheckBox("* Zapoznałem się z instrukcją dla odwiedzających proces produkcyjny");
 
+        // Podpis
         Label lblSignature = new Label("Podpis:");
         Canvas signatureCanvas = new Canvas(400, 200);
         GraphicsContext gc = signatureCanvas.getGraphicsContext2D();
@@ -176,22 +176,10 @@ public class GuestEntryApp extends Application {
         btnSubmit.setOnMouseEntered(e -> btnSubmit.setStyle("-fx-background-color: #45a049;"));
         btnSubmit.setOnMouseExited(e -> btnSubmit.setStyle("-fx-background-color: #4CAF50;"));
 
+        FormController formController = new FormController();
         btnSubmit.setOnAction(e -> {
-            // walidacja przenieść do innej metody
-            if (entryDate.getValue() == null ||
-                    isTimeEmpty(entryBox) ||
-                    isTimeEmpty(exitBox) ||
-                    txtName.getText().isEmpty() ||
-                    txtPurpose.getText().isEmpty() ||
-                    isSignatureEmpty(signatureCanvas) ||
-                    !chkInstruction.isSelected()) {
-
-                // Wyświetl komunikat o błędzie
-                showAlert("Wszystkie pola są wymagane. Proszę upewnić się, że wypełnione są: data, godziny wejścia i wyjścia, imię i nazwisko/firma, cel wizyty, podpis oraz zapoznanie się z instrukcją.");
-            } else {
-                // TODO: Obsługa zapisu danych
-                System.out.println("Formularz wysłany!");
-            }
+            formController.handleFormSubmission(entryDate, entryBox, exitBox, txtName, txtPurpose, signatureCanvas, chkMedical, chkInstruction);
+            formStage.close();
         });
 
         // Układ formularza
@@ -313,38 +301,5 @@ public class GuestEntryApp extends Application {
         timeBox.setAlignment(Pos.CENTER_LEFT);
 
         return timeBox;
-    }
-
-    private boolean isTimeEmpty(HBox timeBox) {
-        // Pobieramy godziny i minuty z ComboBoxów
-        ComboBox<String> hourComboBox = (ComboBox<String>) timeBox.getChildren().get(0);
-        ComboBox<String> minuteComboBox = (ComboBox<String>) timeBox.getChildren().get(2);
-
-        // Sprawdzamy, czy godzina lub minuta są puste
-        return hourComboBox.getValue() == null || minuteComboBox.getValue() == null;
-    }
-
-    private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Błąd");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
-    }
-
-    private boolean isSignatureEmpty(Canvas signatureCanvas) {
-        Image image = signatureCanvas.snapshot(null, null);  // Zrób zrzut obrazu z canvasu
-        javafx.scene.image.PixelReader pixelReader = image.getPixelReader();
-
-        // Sprawdzamy wszystkie piksele na canvasie, czy zawierają kolor czarny
-        for (int x = 0; x < image.getWidth(); x++) {
-            for (int y = 0; y < image.getHeight(); y++) {
-                Color color = pixelReader.getColor(x, y);
-                if (color.equals(Color.BLACK)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }
