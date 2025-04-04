@@ -29,9 +29,10 @@ public class GuestEntryApp extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Rejestr odwiedzająych zakład");
 
+        // Przycisk Start
         Button btnStart = new Button("Start");
         btnStart.setStyle(
                 "-fx-font-size: 24px;" +
@@ -61,21 +62,55 @@ public class GuestEntryApp extends Application {
                         "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);"
         ));
 
-        btnStart.setOnAction(e -> showForm(primaryStage));
+        btnStart.setOnAction(e -> showForm());
 
-        VBox startLayout = new VBox(20, btnStart);
+        // Przycisk Admin Panel
+        Button btnAdminPanel = new Button("Admin Panel");
+        btnAdminPanel.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-padding: 15px 40px;" +
+                        "-fx-background-color: linear-gradient(to right, #4CAF50, #81C784);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-border-radius: 10px;" +
+                        "-fx-background-radius: 10px;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);"
+        );
+        btnAdminPanel.setOnMouseEntered(e -> btnAdminPanel.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-padding: 15px 40px;" +
+                        "-fx-background-color: linear-gradient(to right, #388E3C, #66BB6A);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-border-radius: 10px;" +
+                        "-fx-background-radius: 10px;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.5), 15, 0, 0, 5);"
+        ));
+        btnAdminPanel.setOnMouseExited(e -> btnAdminPanel.setStyle(
+                "-fx-font-size: 24px;" +
+                        "-fx-padding: 15px 40px;" +
+                        "-fx-background-color: linear-gradient(to right, #4CAF50, #81C784);" +
+                        "-fx-text-fill: white;" +
+                        "-fx-border-radius: 10px;" +
+                        "-fx-background-radius: 10px;" +
+                        "-fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.3), 10, 0, 0, 5);"
+        ));
+
+        btnAdminPanel.setOnAction(e -> showLoginDialog(primaryStage));
+
+        // Layout przycisków
+        VBox startLayout = new VBox(20, btnStart, btnAdminPanel);
         startLayout.setPadding(new Insets(20));
         startLayout.setStyle("-fx-alignment: center; -fx-background-color: #f4f4f4;");
 
         Scene startScene = new Scene(startLayout);
         primaryStage.setScene(startScene);
-
         primaryStage.setMaximized(true);
-
         primaryStage.show();
     }
 
-    private void showForm(Stage primaryStage) {
+    private void showForm() {
+        Stage formStage = new Stage();
+        formStage.setTitle("Rejestracja odwiedzającego");
+
         GridPane formGrid = new GridPane();
         formGrid.setPadding(new Insets(20));
         formGrid.setHgap(10);
@@ -104,7 +139,6 @@ public class GuestEntryApp extends Application {
 
         // Checkboxy
         CheckBox chkMedical = new CheckBox("Posiadam badania lekarskie");
-        CheckBox chkHealthDeclaration = new CheckBox("Oświadczenie o stanie zdrowia");
         CheckBox chkInstruction = new CheckBox("* Zapoznałem się z instrukcją dla odwiedzających proces produkcyjny");
 
         Label lblSignature = new Label("Podpis:");
@@ -172,11 +206,10 @@ public class GuestEntryApp extends Application {
         formGrid.add(lblPurpose, 0, 4);
         formGrid.add(txtPurpose, 1, 4);
         formGrid.add(chkMedical, 1, 5);
-        formGrid.add(chkHealthDeclaration, 1, 6);
-        formGrid.add(chkInstruction, 1, 7);
-        formGrid.add(lblSignature, 0, 8);
-        formGrid.add(signatureCanvas, 1, 8);
-        formGrid.add(btnSubmit, 1, 9);
+        formGrid.add(chkInstruction, 1, 6);
+        formGrid.add(lblSignature, 0, 7);
+        formGrid.add(signatureCanvas, 1, 7);
+        formGrid.add(btnSubmit, 1, 8);
 
         VBox formLayout = new VBox(20, formGrid);
         formLayout.setPadding(new Insets(20));
@@ -184,15 +217,76 @@ public class GuestEntryApp extends Application {
 
         formLayout.setMinWidth(Region.USE_PREF_SIZE);
         formLayout.setMinHeight(Region.USE_PREF_SIZE);
-        formLayout.prefWidthProperty().bind(primaryStage.widthProperty());
-        formLayout.prefHeightProperty().bind(primaryStage.heightProperty());
+        formLayout.prefWidthProperty().bind(formStage.widthProperty());
+        formLayout.prefHeightProperty().bind(formStage.heightProperty());
 
         formGrid.setAlignment(Pos.CENTER);
 
         Scene formScene = new Scene(formLayout);
+        formStage.setScene(formScene);
 
-        primaryStage.setMaximized(true);
-        primaryStage.setScene(formScene);
+        formStage.setMaximized(true);
+        formStage.show();
+    }
+
+    // Metoda do pokazania okna logowania
+    private void showLoginDialog(Stage primaryStage) {
+        // Tworzymy okno logowania
+        Stage loginStage = new Stage();
+        loginStage.setTitle("Logowanie do Panelu Administracyjnego");
+
+        // Tworzymy pola do wprowadzenia hasła
+        Label lblPassword = new Label("Wprowadź hasło:");
+        PasswordField passwordField = new PasswordField();
+        passwordField.setPromptText("Hasło");
+
+        Button btnLogin = new Button("Zaloguj");
+        btnLogin.setOnAction(e -> {
+            if (passwordField.getText().equals("85!E")) {
+                // Hasło poprawne, otwieramy panel administracyjny
+                loginStage.close();
+                showAdminPanel(primaryStage);
+            } else {
+                // Hasło błędne, wyświetlamy komunikat
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Błąd logowania");
+                alert.setHeaderText(null);
+                alert.setContentText("Niepoprawne hasło.");
+                alert.showAndWait();
+            }
+        });
+
+        Button btnCancel = new Button("Anuluj");
+        btnCancel.setOnAction(e -> loginStage.close());
+
+        VBox loginLayout = new VBox(10, lblPassword, passwordField, btnLogin, btnCancel);
+        loginLayout.setPadding(new Insets(20));
+        loginLayout.setStyle("-fx-alignment: center; -fx-background-color: #f4f4f4;");
+
+        Scene loginScene = new Scene(loginLayout, 300, 200);
+        loginStage.setScene(loginScene);
+        loginStage.show();
+    }
+
+    // Nowa metoda do wyświetlania panelu administracyjnego
+    private void showAdminPanel(Stage primaryStage) {
+        // Tworzymy nowe okno (panel administracyjny)
+        Stage adminPanelStage = new Stage();
+        adminPanelStage.setTitle("Panel administracyjny");
+
+        // Przykład: dodanie jakichś elementów do panelu administracyjnego
+        Label lblAdmin = new Label("Panel administracyjny");
+        Button btnCloseAdmin = new Button("Zamknij");
+        btnCloseAdmin.setOnAction(e -> adminPanelStage.close());
+
+        VBox adminLayout = new VBox(20, lblAdmin, btnCloseAdmin);
+        adminLayout.setPadding(new Insets(20));
+        adminLayout.setStyle("-fx-alignment: center; -fx-background-color: #f4f4f4;");
+
+        Scene adminScene = new Scene(adminLayout, 400, 200);
+        adminPanelStage.setScene(adminScene);
+        adminPanelStage.setMaximized(true);
+        adminPanelStage.show();
     }
 
     private HBox createTimeSelectionBox() {
@@ -239,11 +333,18 @@ public class GuestEntryApp extends Application {
     }
 
     private boolean isSignatureEmpty(Canvas signatureCanvas) {
-        Image image = signatureCanvas.snapshot(null, null);
+        Image image = signatureCanvas.snapshot(null, null);  // Zrób zrzut obrazu z canvasu
         javafx.scene.image.PixelReader pixelReader = image.getPixelReader();
 
-        // Sprawdzanie piksela na początku, czy jest koloru LIGHTGRAY
-        Color color = pixelReader.getColor(0, 0);
-        return color.equals(Color.LIGHTGRAY);
+        // Sprawdzamy wszystkie piksele na canvasie, czy zawierają kolor czarny
+        for (int x = 0; x < image.getWidth(); x++) {
+            for (int y = 0; y < image.getHeight(); y++) {
+                Color color = pixelReader.getColor(x, y);
+                if (color.equals(Color.BLACK)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
