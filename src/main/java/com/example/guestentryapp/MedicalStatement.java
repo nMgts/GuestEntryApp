@@ -1,5 +1,6 @@
 package com.example.guestentryapp;
 
+import com.example.guestentryapp.controllers.FormController;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
@@ -16,6 +17,8 @@ import javafx.stage.Stage;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class MedicalStatement {
     private VBox statementLayout = new VBox(20);
@@ -130,7 +133,7 @@ public class MedicalStatement {
 
         // Przycisk zatwierdzenia
         Button btnSubmit = new Button("Zatwierdź");
-        btnSubmit.setOnAction(e -> handleSubmit());
+        btnSubmit.setOnAction(e -> handleSubmit(txtName));
 
 
         // Dodanie elementów do layoutu
@@ -152,8 +155,8 @@ public class MedicalStatement {
         statementStage.setMaximized(true);
         statementStage.show();
     }
-
-    private void handleSubmit() {
+/*
+    private void handleSubmit(TextField txtName) {
         // Wykonanie zrzutu VBox
         WritableImage image = statementLayout.snapshot(new SnapshotParameters(), null);
 
@@ -166,9 +169,47 @@ public class MedicalStatement {
             try {
                 // Zapis obrazu do pliku
                 ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+                FormController formController = new FormController();
+                formController.updateMedicalStatement(guestId, guestId + 1000);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+*/
+    private void handleSubmit(TextField txtName) {
+        // Wykonanie zrzutu VBox
+        WritableImage image = statementLayout.snapshot(new SnapshotParameters(), null);
+
+        // Pobranie katalogu domowego użytkownika
+        String userHome = System.getProperty("user.home");
+
+        // Sformatowanie nazwy pliku
+        String name = txtName.getText().replaceAll("\\s+", "_"); // Zamiana spacji na podkreślenia
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = String.format("%d_%s_%s.png", guestId, name, timestamp);
+
+        // Utworzenie obiektu File z pełną ścieżką
+        File file = new File(userHome, fileName);
+
+        try {
+            // Zapis obrazu do pliku
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+
+            // Wyświetlenie powiadomienia o zapisaniu pliku
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Zapisano obraz");
+            alert.setHeaderText(null);
+            alert.setContentText("Obraz został zapisany w: " + file.getAbsolutePath());
+            alert.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Obsługa błędu zapisu pliku
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błąd zapisu");
+            alert.setHeaderText(null);
+            alert.setContentText("Error during saving file");
+            alert.showAndWait();
         }
     }
 
