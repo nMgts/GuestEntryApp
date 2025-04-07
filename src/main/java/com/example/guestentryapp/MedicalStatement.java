@@ -1,15 +1,24 @@
 package com.example.guestentryapp;
 
+import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
+import javafx.scene.SnapshotParameters;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import javax.imageio.ImageIO;
+import java.io.File;
+import java.io.IOException;
+
 public class MedicalStatement {
+    private VBox statementLayout = new VBox(20);
     private double lastX, lastY;
     private int guestId;
 
@@ -18,7 +27,7 @@ public class MedicalStatement {
         statementStage.setTitle("Oświadczenie o badaniach lekarskich");
 
         // Tworzenie elementów GUI
-        VBox statementLayout = new VBox(20);
+        //VBox statementLayout = new VBox(20);
         statementLayout.setStyle("-fx-padding: 20;");
 
         // Nagłówek
@@ -121,8 +130,7 @@ public class MedicalStatement {
 
         // Przycisk zatwierdzenia
         Button btnSubmit = new Button("Zatwierdź");
-        btnSubmit.setOnAction(e -> handleSubmit(txtName, chkJaundice, chkSalmonella, chkAngina, chkFlu, chkPneumonia,
-                chkTuberculosis, chkPusInfections, chkOther, othVir, chkNoVisitRiskCountries, txtVisitedCountries));
+        btnSubmit.setOnAction(e -> handleSubmit());
 
 
         // Dodanie elementów do layoutu
@@ -145,10 +153,23 @@ public class MedicalStatement {
         statementStage.show();
     }
 
-    private void handleSubmit(TextField txtName, CheckBox chkJaundice, CheckBox chkSalmonella, CheckBox chkAngina,
-                              CheckBox chkFlu, CheckBox chkPneumonia, CheckBox chkTuberculosis, CheckBox chkPusInfections,
-                              CheckBox chkOther, CheckBox othVir, CheckBox chkNoVisitRiskCountries, TextField txtVisitedCountries) {
-        System.out.println("wysłane");
+    private void handleSubmit() {
+        // Wykonanie zrzutu VBox
+        WritableImage image = statementLayout.snapshot(new SnapshotParameters(), null);
+
+        // Wybór lokalizacji zapisu pliku
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pliki PNG", "*.png"));
+        File file = fileChooser.showSaveDialog(statementLayout.getScene().getWindow());
+
+        if (file != null) {
+            try {
+                // Zapis obrazu do pliku
+                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public void setGuestId(int guestId) {
