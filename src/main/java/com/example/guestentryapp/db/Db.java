@@ -49,7 +49,7 @@ public class Db {
         getConnection();
         String insertQuery = "insert into guest (date, entryTime, exitTime, name, purpose, medicalExams, " +
                 "instructionStatement, signature)" +
-                "values (?, ?, ?, ?, ?, ?, ?, ?))";
+                "values (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement statement = connection.prepareStatement(insertQuery)) {
             statement.setString(1, date.toString());

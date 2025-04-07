@@ -61,6 +61,14 @@ public class FormController {
         boolean instruction = chkInstruction.isSelected();
         byte[] signatureBytes = getSignatureBytes(signatureCanvas);
 
+        System.out.println(date);
+        System.out.println(entryTime);
+        System.out.println(exitTime);
+        System.out.println(name);
+        System.out.println(purpose);
+        System.out.println(medicalExams);
+        System.out.println(instruction);
+
         db.insertGuest(date, entryTime, exitTime, name, purpose, medicalExams, instruction, signatureBytes);
     }
 
