@@ -9,18 +9,20 @@ public class Guest {
     private String exitTime;
     private String name;
     private String purpose;
-    private boolean medicalStatement;
+    private boolean medicalExams;
+    private Integer medicalStatement;
     private boolean instructionStatement;
     private byte[] signature;
 
     public Guest(int id, LocalDate date, String entryTime, String exitTime, String name, String purpose,
-                 boolean medicalStatement, boolean instructionStatement, byte[] signature) {
+                 boolean medicalExams, Integer medicalStatement, boolean instructionStatement, byte[] signature) {
         this.id = id;
         this.date = date;
         this.entryTime = entryTime;
         this.exitTime = exitTime;
         this.name = name;
         this.purpose = purpose;
+        this.medicalExams = medicalExams;
         this.medicalStatement = medicalStatement;
         this.instructionStatement = instructionStatement;
         this.signature = signature;
@@ -74,11 +76,19 @@ public class Guest {
         this.purpose = purpose;
     }
 
-    public boolean isMedicalStatement() {
+    public boolean isMedicalExams() {
+        return medicalExams;
+    }
+
+    public void setMedicalExams(boolean medicalExamination) {
+        this.medicalExams = medicalExamination;
+    }
+
+    public int getMedicalStatement() {
         return medicalStatement;
     }
 
-    public void setMedicalStatement(boolean medicalStatement) {
+    public void setMedicalStatement(int medicalStatement) {
         this.medicalStatement = medicalStatement;
     }
 

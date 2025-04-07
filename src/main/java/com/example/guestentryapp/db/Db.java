@@ -35,8 +35,8 @@ public class Db {
         getConnection();
         String query = "create table if not exists guest (id integer not null primary key autoincrement, " +
                 "date text not null, entryTime text not null, exitTime text not null, name text not null," +
-                "purpose text not null, medicalExams bool not null, instructionStatement bool not null, " +
-                "signature blob not null)";
+                "purpose text not null, medicalExams bool not null, medicalStatement int," +
+                "instructionStatement bool not null, signature blob not null)";
         try (PreparedStatement statement = connection.prepareStatement(query)) {
             statement.executeUpdate();
             logger.info("Table created");
@@ -86,11 +86,12 @@ public class Db {
                 String name = rs.getString("name");
                 String purpose = rs.getString("purpose");
                 boolean medicalExams = rs.getBoolean("medicalExams");
+                Integer medicalStatement = rs.getInt("medicalStatement");
                 boolean instructionStatement = rs.getBoolean("instructionStatement");
                 byte[] signature = rs.getBytes("signature");
 
                 Guest guest = new Guest(id, date, entryTime, exitTime, name, purpose,
-                        medicalExams, instructionStatement, signature);
+                        medicalExams, medicalStatement, instructionStatement, signature);
                 guests.add(guest);
             }
         } catch (SQLException e) {
@@ -98,6 +99,10 @@ public class Db {
         }
 
         return guests;
+    }
+
+    public void updateMedicalStatement() {
+        
     }
 
     private void showAlert(String message) {

@@ -8,19 +8,24 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
 
+import java.io.ByteArrayInputStream;
 import java.time.LocalDate;
 
 public class GuestEntryApp extends Application {
@@ -279,10 +284,10 @@ public class GuestEntryApp extends Application {
         TableColumn<Guest, LocalDate> colDate = new TableColumn<>("Data");
         colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
 
-        TableColumn<Guest, String> colEntry = new TableColumn<>("Wejście");
+        TableColumn<Guest, String> colEntry = new TableColumn<>("Godzina wejścia");
         colEntry.setCellValueFactory(new PropertyValueFactory<>("entryTime"));
 
-        TableColumn<Guest, String> colExit = new TableColumn<>("Wyjście");
+        TableColumn<Guest, String> colExit = new TableColumn<>("Godzina wyjścia");
         colExit.setCellValueFactory(new PropertyValueFactory<>("exitTime"));
 
         TableColumn<Guest, String> colName = new TableColumn<>("Imię i nazwisko / Firma");
@@ -291,13 +296,78 @@ public class GuestEntryApp extends Application {
         TableColumn<Guest, String> colPurpose = new TableColumn<>("Cel wizyty");
         colPurpose.setCellValueFactory(new PropertyValueFactory<>("purpose"));
 
-        TableColumn<Guest, Boolean> colMedical = new TableColumn<>("Badania");
-        colMedical.setCellValueFactory(new PropertyValueFactory<>("medicalStatement"));
+        TableColumn<Guest, Boolean> colMedical = new TableColumn<>("Badania lekarskie");
+        colMedical.setCellValueFactory(new PropertyValueFactory<>("medicalExams"));
+        colMedical.setCellFactory(param -> new TableCell<Guest, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Tak" : "Nie");
+                }
+            }
+        });
 
-        TableColumn<Guest, Boolean> colInstruction = new TableColumn<>("Instrukcja");
+        TableColumn<Guest, Integer> colMedStat = new TableColumn<>("Oświadczenie o stanie zdrowia nr");
+        colMedStat.setCellValueFactory(new PropertyValueFactory<>("medicalStatement"));
+        colMedStat.setCellFactory(param -> new TableCell<Guest, Integer>() {
+            @Override
+            protected void updateItem(Integer item, boolean empty) {
+                super.updateItem(item, empty);
+
+                if (empty || item == null || item == 0) {
+                    setText("");
+                } else {
+                    setText(String.valueOf(item));
+                }
+            }
+        });
+
+        TableColumn<Guest, Boolean> colInstruction = new TableColumn<>("Oświadczam, że zapoznałem się z instrukcją dla osób odwiedzających proces produkcyjny");
         colInstruction.setCellValueFactory(new PropertyValueFactory<>("instructionStatement"));
+        colInstruction.setCellFactory(param -> new TableCell<Guest, Boolean>() {
+            @Override
+            protected void updateItem(Boolean item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item ? "Tak" : "Nie");
+                }
+            }
+        });
 
-        guestTable.getColumns().addAll(colId, colDate, colEntry, colExit, colName, colPurpose, colMedical, colInstruction);
+        // Kolumna podpisu
+        TableColumn<Guest, byte[]> colSignature = new TableColumn<>("Podpis");
+        colSignature.setCellValueFactory(new PropertyValueFactory<>("signature"));
+
+        // Ustawienie renderera dla podpisu (byte[] -> Image)
+        colSignature.setCellFactory(param -> new TableCell<Guest, byte[]>() {
+            @Override
+            protected void updateItem(byte[] item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setGraphic(null);
+                } else {
+                    try {
+                        // Konwersja byte[] na Image
+                        Image signatureImage = new Image(new ByteArrayInputStream(item));
+                        ImageView imageView = new ImageView(signatureImage);
+                        imageView.setFitWidth(100);  // Ustawienie szerokości obrazu
+                        imageView.setPreserveRatio(true);  // Zachowanie proporcji obrazu
+                        setGraphic(imageView);
+                        setStyle("-fx-alignment: center;");
+                    } catch (Exception e) {
+                        setGraphic(null);  // Jeśli nie udało się załadować obrazu, pokazujemy puste miejsce
+                    }
+                }
+            }
+        });
+
+        guestTable.getColumns().addAll(colId, colDate, colEntry, colExit, colName, colPurpose,
+                colMedical, colMedStat, colInstruction, colSignature);
 
         // Wczytanie danych z bazy
         FormController formController = new FormController();
@@ -307,10 +377,27 @@ public class GuestEntryApp extends Application {
         Button btnCloseAdmin = new Button("Zamknij");
         btnCloseAdmin.setOnAction(e -> adminPanelStage.close());
 
+        // Przycisk odśwież
+        Button btnRefresh = new Button("Odśwież");
+        btnRefresh.setOnAction(e -> {
+            guestTable.setItems(FXCollections.observableArrayList(formController.getGuests()));
+            guestTable.refresh();
+            });
+
         // Layout
-        VBox adminLayout = new VBox(20, guestTable, btnCloseAdmin);
+        VBox adminLayout = new VBox(20, guestTable, btnCloseAdmin, btnRefresh);
         adminLayout.setPadding(new Insets(20));
         adminLayout.setStyle("-fx-background-color: #f4f4f4;");
+
+        // Obliczanie 3/4 wysokości ekranu
+        Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();
+        double height = screenBounds.getHeight() * 0.75;  // 3/4 wysokości ekranu
+
+        // Ustawienie wysokości tabeli na 3/4 wysokości ekranu
+        guestTable.setPrefHeight(height);  // Ustawiamy preferowaną wysokość tabeli
+
+        // Ustawienie rozmiaru okna
+        adminPanelStage.setHeight(height + 100);
 
         Scene adminScene = new Scene(adminLayout);
         adminPanelStage.setScene(adminScene);
