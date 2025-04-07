@@ -1,10 +1,11 @@
 package com.example.guestentryapp.db;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import com.example.guestentryapp.models.Guest;
+
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class Db {
@@ -67,5 +68,33 @@ public class Db {
             logger.warning("Error during guest insert");
             logger.info(e.toString());
         }
+    }
+
+    public List<Guest> showGuests() {
+        getConnection();
+        String query = "select * from guest";
+        List<Guest> guests = new ArrayList<>();
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            ResultSet rs = statement.executeQuery();
+            while (rs.next()) {
+                int id = rs.getInt("id");
+                LocalDate date = LocalDate.parse(rs.getString("date"));
+                String entryTime = rs.getString("entryTime");
+                String exitTime = rs.getString("exitTime");
+                String name = rs.getString("name");
+                String purpose = rs.getString("purpose");
+                boolean medicalExams = rs.getBoolean("medicalExams");
+                boolean instructionStatement = rs.getBoolean("instructionStatement");
+                byte[] signature = rs.getBytes("signature");
+
+                Guest guest = new Guest(id, date, entryTime, exitTime, name, purpose,
+                        medicalExams, instructionStatement, signature);
+                guests.add(guest);
+            }
+        } catch (SQLException e) {
+            logger.info(e.toString());
+        }
+
+        return guests;
     }
 }
