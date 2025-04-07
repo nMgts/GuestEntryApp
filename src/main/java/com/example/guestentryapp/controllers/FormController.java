@@ -1,15 +1,12 @@
 package com.example.guestentryapp.controllers;
 
 import com.example.guestentryapp.MedicalStatement;
-import javafx.scene.Scene;
+import com.example.guestentryapp.db.Db;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.canvas.Canvas;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.Stage;
-
 
 public class FormController {
 

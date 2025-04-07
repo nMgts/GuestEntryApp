@@ -1,6 +1,7 @@
 package com.example.guestentryapp;
 
 import com.example.guestentryapp.controllers.FormController;
+import com.example.guestentryapp.db.Db;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -21,6 +22,7 @@ import javafx.scene.canvas.Canvas;
 import java.time.LocalDate;
 
 public class GuestEntryApp extends Application {
+    private Db db = new Db();
     private double lastX, lastY;
 
     public static void main(String[] args) {
@@ -29,6 +31,8 @@ public class GuestEntryApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        db.getConnection();
+
         primaryStage.setTitle("Rejestr odwiedzająych zakład");
 
         // Przycisk Start

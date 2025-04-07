@@ -16,8 +16,6 @@ public class MedicalStatement {
         Stage statementStage = new Stage();
         statementStage.setTitle("Oświadczenie o badaniach lekarskich");
 
-        statementStage.setTitle("Oświadczenie o badaniach lekarskich");
-
         // Tworzenie elementów GUI
         VBox statementLayout = new VBox(20);
         statementLayout.setStyle("-fx-padding: 20;");
@@ -151,4 +149,4 @@ public class MedicalStatement {
                               CheckBox chkOther, CheckBox othVir, CheckBox chkNoVisitRiskCountries, TextField txtVisitedCountries) {
         System.out.println("wysłane");
     }
-}
+} 
