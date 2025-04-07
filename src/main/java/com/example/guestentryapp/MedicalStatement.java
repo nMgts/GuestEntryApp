@@ -11,7 +11,6 @@ import javafx.scene.image.WritableImage;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import javax.imageio.ImageIO;
@@ -24,6 +23,7 @@ public class MedicalStatement {
     private VBox statementLayout = new VBox(20);
     private double lastX, lastY;
     private int guestId;
+    private String name;
 
     public void show() {
         Stage statementStage = new Stage();
@@ -40,6 +40,7 @@ public class MedicalStatement {
         // Pole imienia i nazwiska
         Label lblName = new Label("Imię i nazwisko / Firma:");
         TextField txtName = new TextField();
+        txtName.setText(this.name);
 
         // Akapit 1
         Label lblStatement1 = new Label("Niniejszym oświadczam, iż nie posiadam żadnych silnych objawów chorobowych stanowiących " +
@@ -133,7 +134,10 @@ public class MedicalStatement {
 
         // Przycisk zatwierdzenia
         Button btnSubmit = new Button("Zatwierdź");
-        btnSubmit.setOnAction(e -> handleSubmit(txtName));
+        btnSubmit.setOnAction(e -> {
+            handleSubmit(txtName);
+            statementStage.close();
+        });
 
 
         // Dodanie elementów do layoutu
@@ -155,52 +159,37 @@ public class MedicalStatement {
         statementStage.setMaximized(true);
         statementStage.show();
     }
-/*
+
     private void handleSubmit(TextField txtName) {
         // Wykonanie zrzutu VBox
         WritableImage image = statementLayout.snapshot(new SnapshotParameters(), null);
 
-        // Wybór lokalizacji zapisu pliku
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Pliki PNG", "*.png"));
-        File file = fileChooser.showSaveDialog(statementLayout.getScene().getWindow());
-
-        if (file != null) {
-            try {
-                // Zapis obrazu do pliku
-                ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
-                FormController formController = new FormController();
-                formController.updateMedicalStatement(guestId, guestId + 1000);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-*/
-    private void handleSubmit(TextField txtName) {
-        // Wykonanie zrzutu VBox
-        WritableImage image = statementLayout.snapshot(new SnapshotParameters(), null);
-
-        // Pobranie katalogu domowego użytkownika
         String userHome = System.getProperty("user.home");
+        File documentsDir = new File(userHome, "Documents/goscie");
+        String networkPath = "Z:\\\\Norbert";
 
         // Sformatowanie nazwy pliku
         String name = txtName.getText().replaceAll("\\s+", "_"); // Zamiana spacji na podkreślenia
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String fileName = String.format("%d_%s_%s.png", guestId, name, timestamp);
+        String fileName = String.format("%d_%s_%s.png", guestId + 1000, this.name, timestamp);
 
         // Utworzenie obiektu File z pełną ścieżką
-        File file = new File(userHome, fileName);
+        File file1 = new File(documentsDir, fileName);
+        File file2 = new File(networkPath, fileName);
 
         try {
             // Zapis obrazu do pliku
-            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file);
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file1);
+            ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", file2);
+
+            FormController formController = new FormController();
+            formController.updateMedicalStatement(guestId, guestId + 1000);
 
             // Wyświetlenie powiadomienia o zapisaniu pliku
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Zapisano obraz");
             alert.setHeaderText(null);
-            alert.setContentText("Obraz został zapisany w: " + file.getAbsolutePath());
+            alert.setContentText("Obraz został zapisany w: " + file1.getAbsolutePath());
             alert.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -215,5 +204,9 @@ public class MedicalStatement {
 
     public void setGuestId(int guestId) {
         this.guestId = guestId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 }

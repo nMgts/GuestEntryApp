@@ -39,11 +39,11 @@ public class FormController {
                     "nazwisko/firma, cel wizyty, podpis oraz zapoznanie się z instrukcją.");
 
         } else {
+            saveForm(entryDate, entryBox, exitBox, txtName, txtPurpose, signatureCanvas, chkMedical, chkInstruction);
             if (!chkMedical.isSelected()) {
                 int guestId = getGuestId(txtName, entryDate);
-                showMedicalStatement(guestId);
+                showMedicalStatement(guestId, txtName.getText());
             }
-            saveForm(entryDate, entryBox, exitBox, txtName, txtPurpose, signatureCanvas, chkMedical, chkInstruction);
             System.out.println("Formularz wysłany!");
         }
     }
@@ -108,10 +108,11 @@ public class FormController {
         return true;
     }
 
-    private void showMedicalStatement(int guestId) {
+    private void showMedicalStatement(int guestId, String name) {
         // Tworzymy nowe okno z oświadczeniem
         MedicalStatement medicalStatement = new MedicalStatement();
         medicalStatement.setGuestId(guestId);
+        medicalStatement.setName(name);
         medicalStatement.show();
     }
 
