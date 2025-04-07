@@ -1,0 +1,26 @@
+/* Stylowanie formularza */
+.form-background {
+    -fx-background-color: #f4f4f4;
+    -fx-alignment: center;
+}
+
+/* Przycisk Zatwierdź */
+#btnSubmit {
+    -fx-font-size: 18px;
+    -fx-padding: 10px 20px;
+    -fx-background-color: #4CAF50;
+    -fx-text-fill: white;
+    -fx-border-radius: 10px;
+    -fx-background-radius: 10px;
+}
+
+#btnSubmit:hover {
+    -fx-background-color: #45a049;
+}
+
+/* Stylowanie podpisu */
+canvas {
+    -fx-background-color: lightgray;
+    -fx-border-color: black;
+    -fx-border-width: 1px;
+}

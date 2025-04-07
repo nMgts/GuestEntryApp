@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.HBox?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.Button?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<GridPane xmlns:fx="http://javafx.com/fxml" fx:controller="com.example.guestentryapp.controllers.FormController">
+    <Label text="Data wejścia:"/>
+    <DatePicker fx:id="entryDate"/>
+    <Label text="Godzina wejścia:"/>
+    <HBox fx:id="entryBox"/>
+    <Label text="Godzina wyjścia:"/>
+    <HBox fx:id="exitBox"/>
+    <Label text="Imię i nazwisko / Firma:"/>
+    <TextField fx:id="txtName"/>
+    <Label text="Cel wizyty:"/>
+    <TextArea fx:id="txtPurpose"/>
+    <CheckBox fx:id="chkMedical" text="Posiadam badania lekarskie"/>
+    <CheckBox fx:id="chkHealthDeclaration" text="Oświadczenie o stanie zdrowia"/>
+    <CheckBox fx:id="chkInstruction" text="Zapoznałem się z instrukcją"/>
+    <Label text="Podpis:"/>
+    <Canvas fx:id="signatureCanvas"/>
+    <Button text="Zatwierdź" onAction="#handleSubmit"/>
+</GridPane>

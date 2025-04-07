@@ -10,12 +10,12 @@ public class MainApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/guestentryapp/fxml/StartScreen.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/example/guestentryapp/fxml/startScreen.fxml"));
         Parent root = loader.load();
         primaryStage.setTitle("Rejestr odwiedzających zakład");
         Scene scene = new Scene(root);
         // Ładowanie specyficznego pliku CSS dla tego widoku
-        scene.getStylesheets().add(getClass().getResource("/com/example/guestentryapp/css/StartScreen.css").toExternalForm());
+        scene.getStylesheets().add(getClass().getResource("/com/example/guestentryapp/css/startScreen.css").toExternalForm());
         primaryStage.setScene(scene);
         primaryStage.setMaximized(true);
         primaryStage.show();
