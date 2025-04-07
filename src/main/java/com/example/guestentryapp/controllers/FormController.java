@@ -27,27 +27,24 @@ public class FormController {
                                      TextArea txtPurpose, Canvas signatureCanvas, CheckBox chkMedical,
                                      CheckBox chkInstruction) {
 
-        // Sprawdzamy, czy pole "Posiadam badania lekarskie" jest zaznaczone
-        if (!chkMedical.isSelected()) {
-            // Jeśli nie, wyświetlamy oświadczenie
-            showMedicalStatement();
-        } else {
-            // Walidacja formularza
-            if (entryDate.getValue() == null ||
-                    isTimeEmpty(entryBox) ||
-                    isTimeEmpty(exitBox) ||
-                    txtName.getText().isEmpty() ||
-                    txtPurpose.getText().isEmpty() ||
-                    isSignatureEmpty(signatureCanvas) ||
-                    !chkInstruction.isSelected()) {
+        if (entryDate.getValue() == null ||
+                isTimeEmpty(entryBox) ||
+                isTimeEmpty(exitBox) ||
+                txtName.getText().isEmpty() ||
+                txtPurpose.getText().isEmpty() ||
+                isSignatureEmpty(signatureCanvas) ||
+                !chkInstruction.isSelected()) {
 
-                // Wyświetlamy komunikat o błędzie
-                showAlert("Wszystkie pola są wymagane. Proszę upewnić się, że wypełnione są: data, godziny wejścia i wyjścia, imię i " +
-                        "nazwisko/firma, cel wizyty, podpis oraz zapoznanie się z instrukcją.");
-            } else {
-                saveForm(entryDate, entryBox, exitBox, txtName, txtPurpose, signatureCanvas, chkMedical, chkInstruction);
-                System.out.println("Formularz wysłany!");
+            showAlert("Wszystkie pola są wymagane. Proszę upewnić się, że wypełnione są: data, godziny wejścia i wyjścia, imię i " +
+                    "nazwisko/firma, cel wizyty, podpis oraz zapoznanie się z instrukcją.");
+
+        } else {
+            if (!chkMedical.isSelected()) {
+                int guestId = getGuestId(txtName, entryDate);
+                showMedicalStatement(guestId);
             }
+            saveForm(entryDate, entryBox, exitBox, txtName, txtPurpose, signatureCanvas, chkMedical, chkInstruction);
+            System.out.println("Formularz wysłany!");
         }
     }
 
@@ -72,6 +69,10 @@ public class FormController {
 
     public void updateMedicalStatement(int id, int medicalStatement) {
         db.updateMedicalStatement(id, medicalStatement);
+    }
+
+    private int getGuestId(TextField txtName, DatePicker entryDate) {
+        return db.getGuestId(txtName.getText(), entryDate.getValue());
     }
 
     private boolean isTimeEmpty(HBox timeBox) {
@@ -107,9 +108,10 @@ public class FormController {
         return true;
     }
 
-    private void showMedicalStatement() {
+    private void showMedicalStatement(int guestId) {
         // Tworzymy nowe okno z oświadczeniem
         MedicalStatement medicalStatement = new MedicalStatement();
+        medicalStatement.setGuestId(guestId);
         medicalStatement.show();
     }
 

@@ -101,6 +101,23 @@ public class Db {
         return guests;
     }
 
+    public int getGuestId(String name, LocalDate date) {
+        getConnection();
+        String query = "select id from guest where name = ? and date = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setString(1, name);
+            statement.setString(2, date.toString());
+
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                return resultSet.getInt("id");
+            }
+        } catch (SQLException e) {
+            logger.info(e.toString());
+        }
+        return -1;
+    }
+
     public void updateMedicalStatement(int id, int medicalStatement) {
         getConnection();
         String query = "update guest set medicalStatement = ? where id = ?";

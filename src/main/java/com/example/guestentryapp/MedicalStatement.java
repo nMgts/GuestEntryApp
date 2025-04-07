@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 
 public class MedicalStatement {
     private double lastX, lastY;
+    private int guestId;
 
     public void show() {
         Stage statementStage = new Stage();
@@ -149,4 +150,8 @@ public class MedicalStatement {
                               CheckBox chkOther, CheckBox othVir, CheckBox chkNoVisitRiskCountries, TextField txtVisitedCountries) {
         System.out.println("wysłane");
     }
-} 
+
+    public void setGuestId(int guestId) {
+        this.guestId = guestId;
+    }
+}
