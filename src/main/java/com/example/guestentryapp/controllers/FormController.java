@@ -2,6 +2,7 @@ package com.example.guestentryapp.controllers;
 
 import com.example.guestentryapp.MedicalStatement;
 import com.example.guestentryapp.db.Db;
+import com.example.guestentryapp.models.Guest;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -15,6 +16,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.logging.Logger;
 
 public class FormController {
@@ -61,15 +63,11 @@ public class FormController {
         boolean instruction = chkInstruction.isSelected();
         byte[] signatureBytes = getSignatureBytes(signatureCanvas);
 
-        System.out.println(date);
-        System.out.println(entryTime);
-        System.out.println(exitTime);
-        System.out.println(name);
-        System.out.println(purpose);
-        System.out.println(medicalExams);
-        System.out.println(instruction);
-
         db.insertGuest(date, entryTime, exitTime, name, purpose, medicalExams, instruction, signatureBytes);
+    }
+
+    public List<Guest> getGuests() {
+        return db.getGuests();
     }
 
     private boolean isTimeEmpty(HBox timeBox) {

@@ -9,5 +9,6 @@ module com.example.guestentryapp {
     requires javafx.swing;
 
     opens com.example.guestentryapp to javafx.fxml;
+    opens com.example.guestentryapp.models to javafx.base;
     exports com.example.guestentryapp;
 }

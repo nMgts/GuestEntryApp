@@ -2,6 +2,7 @@ package com.example.guestentryapp;
 
 import com.example.guestentryapp.controllers.FormController;
 import com.example.guestentryapp.db.Db;
+import com.example.guestentryapp.models.Guest;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -10,6 +11,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -266,16 +268,51 @@ public class GuestEntryApp extends Application {
         Stage adminPanelStage = new Stage();
         adminPanelStage.setTitle("Panel administracyjny");
 
-        // Przykład: dodanie jakichś elementów do panelu administracyjnego
-        Label lblAdmin = new Label("Panel administracyjny");
+        //Tabela
+        TableView<Guest> guestTable = new TableView<>();
+        guestTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        //Kolumny
+        TableColumn<Guest, Integer> colId = new TableColumn<>("ID");
+        colId.setCellValueFactory(new PropertyValueFactory<>("id"));
+
+        TableColumn<Guest, LocalDate> colDate = new TableColumn<>("Data");
+        colDate.setCellValueFactory(new PropertyValueFactory<>("date"));
+
+        TableColumn<Guest, String> colEntry = new TableColumn<>("Wejście");
+        colEntry.setCellValueFactory(new PropertyValueFactory<>("entryTime"));
+
+        TableColumn<Guest, String> colExit = new TableColumn<>("Wyjście");
+        colExit.setCellValueFactory(new PropertyValueFactory<>("exitTime"));
+
+        TableColumn<Guest, String> colName = new TableColumn<>("Imię i nazwisko / Firma");
+        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
+
+        TableColumn<Guest, String> colPurpose = new TableColumn<>("Cel wizyty");
+        colPurpose.setCellValueFactory(new PropertyValueFactory<>("purpose"));
+
+        TableColumn<Guest, Boolean> colMedical = new TableColumn<>("Badania");
+        colMedical.setCellValueFactory(new PropertyValueFactory<>("medicalStatement"));
+
+        TableColumn<Guest, Boolean> colInstruction = new TableColumn<>("Instrukcja");
+        colInstruction.setCellValueFactory(new PropertyValueFactory<>("instructionStatement"));
+
+        guestTable.getColumns().addAll(colId, colDate, colEntry, colExit, colName, colPurpose, colMedical, colInstruction);
+
+        // Wczytanie danych z bazy
+        FormController formController = new FormController();
+        guestTable.setItems(FXCollections.observableArrayList(formController.getGuests()));
+
+        // Przycisk zamknij
         Button btnCloseAdmin = new Button("Zamknij");
         btnCloseAdmin.setOnAction(e -> adminPanelStage.close());
 
-        VBox adminLayout = new VBox(20, lblAdmin, btnCloseAdmin);
+        // Layout
+        VBox adminLayout = new VBox(20, guestTable, btnCloseAdmin);
         adminLayout.setPadding(new Insets(20));
-        adminLayout.setStyle("-fx-alignment: center; -fx-background-color: #f4f4f4;");
+        adminLayout.setStyle("-fx-background-color: #f4f4f4;");
 
-        Scene adminScene = new Scene(adminLayout, 400, 200);
+        Scene adminScene = new Scene(adminLayout);
         adminPanelStage.setScene(adminScene);
         adminPanelStage.setMaximized(true);
         adminPanelStage.show();

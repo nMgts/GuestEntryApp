@@ -1,6 +1,7 @@
 package com.example.guestentryapp.db;
 
 import com.example.guestentryapp.models.Guest;
+import javafx.scene.control.Alert;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -65,12 +66,13 @@ public class Db {
             statement.executeUpdate();
             logger.info("Guest inserted successfully");
         } catch (SQLException e) {
+            showAlert("Nie udało się zapisać w bazie danych!");
             logger.warning("Error during guest insert");
             logger.info(e.toString());
         }
     }
 
-    public List<Guest> showGuests() {
+    public List<Guest> getGuests() {
         getConnection();
         String query = "select * from guest";
         List<Guest> guests = new ArrayList<>();
@@ -96,5 +98,13 @@ public class Db {
         }
 
         return guests;
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Błąd");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 }
