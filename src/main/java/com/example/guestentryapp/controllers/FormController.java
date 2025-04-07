@@ -70,6 +70,10 @@ public class FormController {
         return db.getGuests();
     }
 
+    public void updateMedicalStatement(int id, int medicalStatement) {
+        db.updateMedicalStatement(id, medicalStatement);
+    }
+
     private boolean isTimeEmpty(HBox timeBox) {
         // Pobieramy godziny i minuty z ComboBoxów
         ComboBox<String> hourComboBox = (ComboBox<String>) timeBox.getChildren().get(0);

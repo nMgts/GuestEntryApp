@@ -101,8 +101,17 @@ public class Db {
         return guests;
     }
 
-    public void updateMedicalStatement() {
-        
+    public void updateMedicalStatement(int id, int medicalStatement) {
+        getConnection();
+        String query = "update guest set medicalStatement = ? where id = ?";
+        try (PreparedStatement statement = connection.prepareStatement(query)) {
+            statement.setInt(1, medicalStatement);
+            statement.setInt(2, id);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            showAlert("Błąd bazy danych");
+            logger.info(e.toString());
+        }
     }
 
     private void showAlert(String message) {
