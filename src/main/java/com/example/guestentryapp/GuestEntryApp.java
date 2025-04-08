@@ -21,11 +21,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.time.LocalDate;
 
 public class GuestEntryApp extends Application {
@@ -368,6 +370,27 @@ public class GuestEntryApp extends Application {
 
         guestTable.getColumns().addAll(colId, colDate, colEntry, colExit, colName, colPurpose,
                 colMedical, colMedStat, colInstruction, colSignature);
+        guestTable.setRowFactory(tv -> {
+            TableRow<Guest> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                System.out.println("klik");
+                if (!row.isEmpty()) {  // event.getClickCount() == 2 &&
+                    Guest selectedGuest = row.getItem();
+                    int statementId = selectedGuest.getMedicalStatement();
+
+                    if (statementId > 0) {
+                        showMedicalStatementImage(statementId);
+                    } else {
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Brak oświadczenia");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Ten gość nie ma przypisanego numeru oświadczenia.");
+                        alert.showAndWait();
+                    }
+                }
+            });
+            return row;
+        });
 
         // Wczytanie danych z bazy
         FormController formController = new FormController();
@@ -403,6 +426,68 @@ public class GuestEntryApp extends Application {
         adminPanelStage.setScene(adminScene);
         adminPanelStage.setMaximized(true);
         adminPanelStage.show();
+    }
+
+    private void showMedicalStatementImage(int statementId) {
+        // Format nazwy pliku (szukamy po prefiksie "ID_" + statementId)
+        String filePrefix = statementId + "_";
+        String userHome = System.getProperty("user.home");
+        File documentsDir = new File(userHome, "Documents/goscie");
+        File networkDir = new File("Z:\\Norbert");
+
+        File imageFile = findImageFileByPrefix(documentsDir, filePrefix);
+        if (imageFile == null) {
+            imageFile = findImageFileByPrefix(networkDir, filePrefix);
+        }
+
+        if (imageFile != null && imageFile.exists()) {
+            Image image = new Image(imageFile.toURI().toString());
+
+            ImageView imageView = new ImageView(image);
+            imageView.setPreserveRatio(true);
+            imageView.setSmooth(true);
+
+            final double[] zoomFactor = {1.0};
+            imageView.setOnScroll(event -> {
+                if (event.getDeltaY() > 0) {
+                    zoomFactor[0] *= 1.1;
+                } else {
+                    zoomFactor[0] /= 1.1;
+                }
+                imageView.setScaleX(zoomFactor[0]);
+                imageView.setScaleY(zoomFactor[0]);
+            });
+
+            ScrollPane scrollPane = new ScrollPane(imageView);
+            scrollPane.setPannable(true);
+            scrollPane.setFitToWidth(true);
+            scrollPane.setFitToHeight(true);
+
+            // Layout główny
+            VBox layout = new VBox(scrollPane);
+            layout.setPadding(new Insets(10));
+            layout.setAlignment(Pos.CENTER);
+
+            Scene scene = new Scene(layout);
+
+            Stage imageStage = new Stage();
+            imageStage.setTitle("Oświadczenie nr " + statementId);
+            imageStage.setScene(scene);
+            imageStage.initModality(Modality.APPLICATION_MODAL);
+            imageStage.setMaximized(true); // pełny ekran
+            imageStage.show();
+        } else {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Plik nie znaleziony");
+            alert.setHeaderText(null);
+            alert.setContentText("Nie znaleziono pliku dla oświadczenia nr " + statementId);
+            alert.showAndWait();
+        }
+    }
+
+    private File findImageFileByPrefix(File directory, String prefix) {
+        File[] matchingFiles = directory.listFiles((dir, name) -> name.startsWith(prefix) && name.endsWith(".png"));
+        return (matchingFiles != null && matchingFiles.length > 0) ? matchingFiles[0] : null;
     }
 
     private HBox createTimeSelectionBox() {
