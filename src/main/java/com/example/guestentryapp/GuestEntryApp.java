@@ -25,9 +25,7 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
@@ -494,7 +492,7 @@ public class GuestEntryApp extends Application {
             alert.showAndWait();
         }
     }
-
+/*
     private void exportGuestsToExcel(List<Guest> guests) {
         Workbook workbook = new XSSFWorkbook();
         Sheet sheet = workbook.createSheet("Goście");
@@ -529,6 +527,95 @@ public class GuestEntryApp extends Application {
         for (int i = 0; i < headers.length; i++) {
             sheet.autoSizeColumn(i);
         }
+
+        try {
+            String userHome = System.getProperty("user.home");
+            File file = new File(userHome + "/Documents/goscie/goscie.xlsx");
+            FileOutputStream fileOut = new FileOutputStream(file);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Eksport zakończony");
+            alert.setHeaderText(null);
+            alert.setContentText("Plik Excel został zapisany do: " + file.getAbsolutePath());
+            alert.showAndWait();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błąd");
+            alert.setHeaderText("Nie udało się zapisać pliku Excel.");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+*/
+
+    private void exportGuestsToExcel(List<Guest> guests) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Goście");
+
+        // Nagłówki
+        Row header = sheet.createRow(0);
+        String[] headers = {
+                "ID", "Data", "Wejście", "Wyjście", "Imię i nazwisko / Firma", "Cel wizyty",
+                "Badania lekarskie", "Oświadczenie zdrowotne nr", "Zapoznano z instrukcją", "Podpis"
+        };
+
+        for (int i = 0; i < headers.length; i++) {
+            org.apache.poi.ss.usermodel.Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        int rowIndex = 1;
+        for (Guest guest : guests) {
+            Row row = sheet.createRow(rowIndex);
+            row.setHeightInPoints(60); // wyższy rząd na podpis
+
+            row.createCell(0).setCellValue(guest.getId());
+            row.createCell(1).setCellValue(String.valueOf(guest.getDate()));
+            row.createCell(2).setCellValue(guest.getEntryTime());
+            row.createCell(3).setCellValue(guest.getExitTime());
+            row.createCell(4).setCellValue(guest.getName());
+            row.createCell(5).setCellValue(guest.getPurpose());
+            row.createCell(6).setCellValue(guest.isMedicalExams() ? "Tak" : "Nie");
+            row.createCell(7).setCellValue(guest.getMedicalStatement() == 0 ? "" : String.valueOf(guest.getMedicalStatement()));
+            row.createCell(8).setCellValue(guest.isInstructionStatement() ? "Tak" : "Nie");
+
+            // Wklejanie podpisu jako obrazek (jeśli jest)
+            if (guest.getSignature() != null && guest.getSignature().length > 0) {
+                try {
+                    byte[] signatureBytes = guest.getSignature(); // tablica bajtów z podpisem
+
+                    // Dodaj obrazek do workbooka
+                    int pictureIdx = workbook.addPicture(signatureBytes, Workbook.PICTURE_TYPE_PNG); // lub PICTURE_TYPE_JPEG
+
+                    // Ustawienia dla wstawienia obrazka do komórki
+                    CreationHelper helper = workbook.getCreationHelper();
+                    Drawing<?> drawing = sheet.createDrawingPatriarch();
+                    ClientAnchor anchor = helper.createClientAnchor();
+                    anchor.setCol1(9); // kolumna 10 - podpis
+                    anchor.setRow1(rowIndex);
+                    anchor.setCol2(10); // ograniczenie szerokości obrazka
+                    anchor.setRow2(rowIndex + 1); // ograniczenie wysokości obrazka
+
+                    // Wstawienie obrazka
+                    drawing.createPicture(anchor, pictureIdx);
+                } catch (Exception e) {
+                    System.err.println("Błąd przy dodawaniu podpisu dla gościa " + guest.getName() + ": " + e.getMessage());
+                }
+            }
+
+            rowIndex++;
+        }
+
+        // Auto-size dla pierwszych kolumn
+        for (int i = 0; i < headers.length - 1; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        // Ustaw szerokość kolumny z podpisem
+        sheet.setColumnWidth(9, 20 * 256); // 20 znaków szerokości
 
         try {
             String userHome = System.getProperty("user.home");
