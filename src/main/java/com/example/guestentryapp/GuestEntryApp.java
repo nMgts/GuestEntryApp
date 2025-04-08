@@ -25,10 +25,17 @@ import javafx.stage.Modality;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.scene.canvas.Canvas;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.util.List;
 
 public class GuestEntryApp extends Application {
     private Db db = new Db();
@@ -405,10 +412,13 @@ public class GuestEntryApp extends Application {
         btnRefresh.setOnAction(e -> {
             guestTable.setItems(FXCollections.observableArrayList(formController.getGuests()));
             guestTable.refresh();
-            });
+        });
+
+        Button btnExport = new Button("Pobierz");
+        btnExport.setOnAction(e -> exportGuestsToExcel(formController.getGuests()));
 
         // Layout
-        VBox adminLayout = new VBox(20, guestTable, btnCloseAdmin, btnRefresh);
+        VBox adminLayout = new VBox(20, guestTable, btnCloseAdmin, btnRefresh, btnExport);
         adminLayout.setPadding(new Insets(20));
         adminLayout.setStyle("-fx-background-color: #f4f4f4;");
 
@@ -484,6 +494,64 @@ public class GuestEntryApp extends Application {
             alert.showAndWait();
         }
     }
+
+    private void exportGuestsToExcel(List<Guest> guests) {
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Goście");
+
+        // Nagłówki
+        Row header = sheet.createRow(0);
+        String[] headers = {
+                "ID", "Data", "Wejście", "Wyjście", "Imię i nazwisko / Firma", "Cel wizyty",
+                "Badania lekarskie", "Oświadczenie zdrowotne nr", "Zapoznano z instrukcją"
+        };
+
+        for (int i = 0; i < headers.length; i++) {
+            org.apache.poi.ss.usermodel.Cell cell = header.createCell(i);
+            cell.setCellValue(headers[i]);
+        }
+
+        // Dane
+        int rowIndex = 1;
+        for (Guest guest : guests) {
+            Row row = sheet.createRow(rowIndex++);
+            row.createCell(0).setCellValue(guest.getId());
+            row.createCell(1).setCellValue(String.valueOf(guest.getDate()));
+            row.createCell(2).setCellValue(guest.getEntryTime());
+            row.createCell(3).setCellValue(guest.getExitTime());
+            row.createCell(4).setCellValue(guest.getName());
+            row.createCell(5).setCellValue(guest.getPurpose());
+            row.createCell(6).setCellValue(guest.isMedicalExams() ? "Tak" : "Nie");
+            row.createCell(7).setCellValue(guest.getMedicalStatement() == 0 ? "" : String.valueOf(guest.getMedicalStatement()));
+            row.createCell(8).setCellValue(guest.isInstructionStatement() ? "Tak" : "Nie");
+        }
+
+        for (int i = 0; i < headers.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        try {
+            String userHome = System.getProperty("user.home");
+            File file = new File(userHome + "/Documents/goscie/goscie.xlsx");
+            FileOutputStream fileOut = new FileOutputStream(file);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Eksport zakończony");
+            alert.setHeaderText(null);
+            alert.setContentText("Plik Excel został zapisany do: " + file.getAbsolutePath());
+            alert.showAndWait();
+        } catch (IOException e) {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Błąd");
+            alert.setHeaderText("Nie udało się zapisać pliku Excel.");
+            alert.setContentText(e.getMessage());
+            alert.showAndWait();
+        }
+    }
+
 
     private File findImageFileByPrefix(File directory, String prefix) {
         File[] matchingFiles = directory.listFiles((dir, name) -> name.startsWith(prefix) && name.endsWith(".png"));
